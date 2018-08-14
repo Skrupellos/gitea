@@ -16,6 +16,7 @@ type AuthenticationForm struct {
 	Name                          string `binding:"Required;MaxSize(30)"`
 	Host                          string
 	Port                          int
+	URL                           string
 	BindDN                        string
 	BindPassword                  string
 	UserBase                      string
@@ -36,9 +37,9 @@ type AuthenticationForm struct {
 	SMTPHost                      string
 	SMTPPort                      int
 	AllowedDomains                string
-	SecurityProtocol              int `binding:"Range(0,2)"`
 	TLS                           bool
 	SkipVerify                    bool
+	StartTLS                      bool
 	PAMServiceName                string
 	Oauth2Provider                string
 	Oauth2Key                     string

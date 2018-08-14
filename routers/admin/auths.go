@@ -56,11 +56,6 @@ var (
 		{models.LoginNames[models.LoginPAM], models.LoginPAM},
 		{models.LoginNames[models.LoginOAuth2], models.LoginOAuth2},
 	}
-	securityProtocols = []dropdownItem{
-		{models.SecurityProtocolNames[ldap.SecurityProtocolUnencrypted], ldap.SecurityProtocolUnencrypted},
-		{models.SecurityProtocolNames[ldap.SecurityProtocolLDAPS], ldap.SecurityProtocolLDAPS},
-		{models.SecurityProtocolNames[ldap.SecurityProtocolStartTLS], ldap.SecurityProtocolStartTLS},
-	}
 )
 
 // NewAuthSource render adding a new auth source page
@@ -71,12 +66,10 @@ func NewAuthSource(ctx *context.Context) {
 
 	ctx.Data["type"] = models.LoginLDAP
 	ctx.Data["CurrentTypeName"] = models.LoginNames[models.LoginLDAP]
-	ctx.Data["CurrentSecurityProtocol"] = models.SecurityProtocolNames[ldap.SecurityProtocolUnencrypted]
 	ctx.Data["smtp_auth"] = "PLAIN"
 	ctx.Data["is_active"] = true
 	ctx.Data["is_sync_enabled"] = true
 	ctx.Data["AuthSources"] = authSources
-	ctx.Data["SecurityProtocols"] = securityProtocols
 	ctx.Data["SMTPAuths"] = models.SMTPAuths
 	ctx.Data["OAuth2Providers"] = models.OAuth2Providers
 	ctx.Data["OAuth2DefaultCustomURLMappings"] = models.OAuth2DefaultCustomURLMappings
@@ -98,10 +91,9 @@ func parseLDAPConfig(form auth.AuthenticationForm) *models.LDAPConfig {
 	return &models.LDAPConfig{
 		Source: &ldap.Source{
 			Name:                  form.Name,
-			Host:                  form.Host,
-			Port:                  form.Port,
-			SecurityProtocol:      ldap.SecurityProtocol(form.SecurityProtocol),
+			URL:                   form.URL,
 			SkipVerify:            form.SkipVerify,
+			StartTLS:              form.StartTLS,
 			BindDN:                form.BindDN,
 			UserDN:                form.UserDN,
 			BindPassword:          form.BindPassword,
@@ -159,9 +151,7 @@ func NewAuthSourcePost(ctx *context.Context, form auth.AuthenticationForm) {
 	ctx.Data["PageIsAdminAuthentications"] = true
 
 	ctx.Data["CurrentTypeName"] = models.LoginNames[models.LoginType(form.Type)]
-	ctx.Data["CurrentSecurityProtocol"] = models.SecurityProtocolNames[ldap.SecurityProtocol(form.SecurityProtocol)]
 	ctx.Data["AuthSources"] = authSources
-	ctx.Data["SecurityProtocols"] = securityProtocols
 	ctx.Data["SMTPAuths"] = models.SMTPAuths
 	ctx.Data["OAuth2Providers"] = models.OAuth2Providers
 	ctx.Data["OAuth2DefaultCustomURLMappings"] = models.OAuth2DefaultCustomURLMappings
@@ -171,7 +161,7 @@ func NewAuthSourcePost(ctx *context.Context, form auth.AuthenticationForm) {
 	switch models.LoginType(form.Type) {
 	case models.LoginLDAP, models.LoginDLDAP:
 		config = parseLDAPConfig(form)
-		hasTLS = ldap.SecurityProtocol(form.SecurityProtocol) > ldap.SecurityProtocolUnencrypted
+		hasTLS = true
 	case models.LoginSMTP:
 		config = parseSMTPConfig(form)
 		hasTLS = true
@@ -220,7 +210,6 @@ func EditAuthSource(ctx *context.Context) {
 	ctx.Data["PageIsAdmin"] = true
 	ctx.Data["PageIsAdminAuthentications"] = true
 
-	ctx.Data["SecurityProtocols"] = securityProtocols
 	ctx.Data["SMTPAuths"] = models.SMTPAuths
 	ctx.Data["OAuth2Providers"] = models.OAuth2Providers
 	ctx.Data["OAuth2DefaultCustomURLMappings"] = models.OAuth2DefaultCustomURLMappings

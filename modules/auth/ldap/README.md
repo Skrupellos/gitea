@@ -32,9 +32,18 @@ share the following fields:
 * Authorization Name **(required)**
     * A name to assign to the new method of authorization.
 
-* Host **(required)**
+* URL **(required)**
     * The address where the LDAP server can be reached.
-    * Example: mydomain.com
+    * Examples
+      * `ldap://localhost`: Connect via TCP to localhost on port 389, encryption
+        using Start TLS can be turned on via "Enable TLS Encryption"
+      * `ldaps://example.com`: Connect via TCP to example.com on port 636. The
+        whole communication is always encrypted (no need to "Enable TLS
+        Encryption").
+      * `ldap://localhost:1337`: For LDAP(S) hosts, the default port can be
+        replaced by an explicitly specified one.
+      * `ldapi://%2Frun%2Fopenldap%2Fldapi`: Connect to the LDAP sever via
+        the unix domain socket located at `/run/openldap/ldapi`.
 
 * Port **(required)**
     * The port to use when connecting to the server.

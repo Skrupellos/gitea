@@ -48,13 +48,6 @@ var LoginNames = map[LoginType]string{
 	LoginOAuth2: "OAuth2",
 }
 
-// SecurityProtocolNames contains the name of SecurityProtocol values.
-var SecurityProtocolNames = map[ldap.SecurityProtocol]string{
-	ldap.SecurityProtocolUnencrypted: "Unencrypted",
-	ldap.SecurityProtocolLDAPS:       "LDAPS",
-	ldap.SecurityProtocolStartTLS:    "StartTLS",
-}
-
 // Ensure structs implemented interface.
 var (
 	_ core.Conversion = &LDAPConfig{}
@@ -76,12 +69,6 @@ func (cfg *LDAPConfig) FromDB(bs []byte) error {
 // ToDB exports a LDAPConfig to a serialized format.
 func (cfg *LDAPConfig) ToDB() ([]byte, error) {
 	return json.Marshal(cfg)
-}
-
-// SecurityProtocolName returns the name of configured security
-// protocol.
-func (cfg *LDAPConfig) SecurityProtocolName() string {
-	return SecurityProtocolNames[cfg.SecurityProtocol]
 }
 
 // SMTPConfig holds configuration for the SMTP login source.
@@ -213,16 +200,19 @@ func (source *LoginSource) IsOAuth2() bool {
 
 // HasTLS returns true of this source supports TLS.
 func (source *LoginSource) HasTLS() bool {
-	return ((source.IsLDAP() || source.IsDLDAP()) &&
-		source.LDAP().SecurityProtocol > ldap.SecurityProtocolUnencrypted) ||
-		source.IsSMTP()
+	switch source.Type {
+	case LoginLDAP, LoginDLDAP:
+		return true
+	case LoginSMTP:
+		return true
+	}
+
+	return false
 }
 
 // UseTLS returns true of this source is configured to use TLS.
 func (source *LoginSource) UseTLS() bool {
 	switch source.Type {
-	case LoginLDAP, LoginDLDAP:
-		return source.LDAP().SecurityProtocol != ldap.SecurityProtocolUnencrypted
 	case LoginSMTP:
 		return source.SMTP().TLS
 	}
